@@ -1,0 +1,259 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Transport Analytics V3 | Torre de Controle</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.4/dist/chart.umd.min.js"></script>
+<style>
+:root{--bg:#f4f7fb;--card:#fff;--ink:#172033;--muted:#667085;--line:#e4e7ec;--nav:#101828;--blue:#155eef;--green:#079455;--red:#d92d20;--amber:#dc6803;--purple:#7a5af8}
+*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink);font:14px "Segoe UI",Arial,sans-serif}.app{min-height:100vh}
+.side{position:fixed;inset:0 auto 0 0;width:245px;background:var(--nav);padding:22px 15px;color:#fff;overflow:auto}.brand{font-weight:800;font-size:19px;padding:0 10px 22px}.brand b{color:#84adff}
+.nav button{width:100%;border:0;background:transparent;color:#b8c1d1;text-align:left;padding:11px 12px;border-radius:8px;margin:2px 0;cursor:pointer}.nav button:hover,.nav button.active{background:#1d2939;color:#fff}
+.main{margin-left:245px;padding:24px 28px}.head{display:flex;justify-content:space-between;gap:20px;align-items:center;margin-bottom:18px}.head h1{margin:0;font-size:24px}.head p{margin:5px 0 0;color:var(--muted)}
+.actions,.filters{display:flex;gap:8px;flex-wrap:wrap}.btn{border:1px solid var(--line);background:#fff;padding:9px 12px;border-radius:8px;font-weight:650;cursor:pointer}.btn.primary{background:var(--blue);color:#fff;border-color:var(--blue)}.btn.danger{color:var(--red)}.file{display:none}
+.notice{padding:10px 12px;border-radius:8px;background:#eff8ff;color:#175cd3;margin-bottom:12px}.notice.empty{background:#fff4ed;color:#b54708}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}.card{background:var(--card);border:1px solid var(--line);border-radius:12px;padding:16px;box-shadow:0 1px 2px #1018280a}.label{color:var(--muted);font-size:12px}.value{font-size:23px;font-weight:800;margin:7px 0}.delta{font-size:12px}.green{color:var(--green)}.red{color:var(--red)}.amber{color:var(--amber)}
+.grid{display:grid;grid-template-columns:1.5fr 1fr;gap:12px;margin-top:12px}.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-top:12px}.grid4{display:grid;grid-template-columns:repeat(4,1fr);gap:12px;margin-top:12px}.chart{height:290px}.card h3{font-size:15px;margin:0 0 14px}.page{display:none}.page.active{display:block}
+.filters{margin-bottom:12px}.filters input,.filters select{border:1px solid var(--line);border-radius:8px;padding:9px;background:#fff;min-width:130px}.table{overflow:auto}table{width:100%;border-collapse:collapse}th,td{padding:10px 8px;border-bottom:1px solid var(--line);white-space:nowrap;text-align:left}th{font-size:11px;color:var(--muted);text-transform:uppercase}td{font-size:13px}.clickable tbody tr{cursor:pointer}.clickable tbody tr:hover{background:#f8fafc}
+.badge{display:inline-block;padding:4px 8px;border-radius:99px;font-size:11px;font-weight:700}.ok{background:#dcfae6;color:#067647}.warn{background:#fef0c7;color:#b54708}.bad{background:#fee4e2;color:#b42318}.info{background:#dbeafe;color:#175cd3}
+.drop{border:1.5px dashed #98a2b3;border-radius:10px;padding:13px;text-align:center;color:var(--muted);background:#fafcff}.metricrow{margin:12px 0}.metricrow .line{display:flex;justify-content:space-between;margin-bottom:6px}.bar{height:8px;background:#eef2f6;border-radius:9px;overflow:hidden}.bar i{display:block;height:100%;background:var(--blue)}.empty{padding:30px;text-align:center;color:var(--muted)}
+.alert{padding:11px 12px;border-radius:9px;margin:7px 0}.alert.critical{background:#fff1f0;color:#b42318}.alert.attention{background:#fff8e7;color:#b54708}.alert.opportunity{background:#ecfdf3;color:#067647}.alert.info{background:#eff8ff;color:#175cd3}
+.chips{display:flex;gap:6px;flex-wrap:wrap}.chip{padding:5px 8px;border-radius:99px;background:#f2f4f7;color:#475467;font-size:11px}.muted{color:var(--muted)}
+.modal{position:fixed;inset:0;background:#10182866;display:none;align-items:center;justify-content:center;padding:20px;z-index:50}.modal.open{display:flex}.modalbox{background:#fff;border-radius:14px;max-width:850px;width:100%;max-height:90vh;overflow:auto;padding:22px}.modalhead{display:flex;justify-content:space-between;align-items:center}.close{border:0;background:#f2f4f7;border-radius:50%;width:34px;height:34px;cursor:pointer}.detailgrid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}.detail{padding:10px;background:#f8fafc;border-radius:8px}.detail b{display:block;margin-top:4px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin-bottom:12px}.tabs button{border:1px solid var(--line);background:#fff;padding:8px 12px;border-radius:8px;cursor:pointer}.tabs button.active{background:#101828;color:#fff}
+.small{font-size:12px}.right{text-align:right}.positive{color:var(--green);font-weight:700}.negative{color:var(--red);font-weight:700}
+@media(max-width:1150px){.kpis{grid-template-columns:repeat(2,1fr)}.grid,.grid3,.grid4{grid-template-columns:1fr}}@media(max-width:720px){.side{position:static;width:100%;height:auto}.nav{display:flex;overflow:auto}.nav button{min-width:145px}.main{margin-left:0;padding:15px}.kpis{grid-template-columns:1fr 1fr}.head{align-items:flex-start;flex-direction:column}.detailgrid{grid-template-columns:1fr 1fr}}
+@media print{.side,.actions,.filters,.tabs{display:none!important}.main{margin:0}.page{display:none!important}.page.active{display:block!important}}
+</style>
+</head>
+<body>
+<div class="app">
+<aside class="side">
+  <div class="brand">Transport<b>Analytics</b></div>
+  <div class="nav">
+    <button class="active" data-page="dashboard">◈ Torre de Controle</button>
+    <button data-page="planejamento">▣ Planejamento</button>
+    <button data-page="custos">₿ Custos</button>
+    <button data-page="pricing">⌁ Pricing</button>
+    <button data-page="rotas">⌖ Rotas</button>
+    <button data-page="transportadores">🚛 Transportadores</button>
+    <button data-page="performance">▥ Performance</button>
+    <button data-page="historico">◷ Histórico CSV</button>
+  </div>
+</aside>
+
+<main class="main">
+<div class="head">
+  <div><h1 id="pageTitle">Torre de Controle</h1><p id="pageSub">Operação, custos, rentabilidade e alertas baseados exclusivamente no CSV importado.</p></div>
+  <div class="actions">
+    <input id="file" class="file" type="file" accept=".csv,text/csv">
+    <button class="btn primary" onclick="document.getElementById('file').click()">📥 Importar CSV</button>
+    <button class="btn" onclick="exportCSV()">Exportar resumo</button>
+    <button class="btn" onclick="print()">Imprimir</button>
+  </div>
+</div>
+<div id="fileStatus" class="notice empty">Nenhum CSV importado. Importe uma base para carregar os dados reais.</div>
+
+<section id="dashboard" class="page active">
+  <div class="filters">
+    <select id="periodFilter" onchange="renderAll()"><option value="all">Todos os registros</option><option value="today">Hoje</option><option value="yesterday">Ontem</option><option value="week">Semana</option><option value="month">Mês</option><option value="custom">Período personalizado</option></select>
+    <input id="dateFrom" type="date" onchange="renderAll()" title="Data inicial">
+    <input id="dateTo" type="date" onchange="renderAll()" title="Data final">
+  </div>
+  <div class="kpis" id="kpis"></div>
+  <div class="grid">
+    <div class="card"><h3>Receita × Custo</h3><div class="chart"><canvas id="trend"></canvas></div></div>
+    <div class="card"><h3>Composição do custo</h3><div class="chart"><canvas id="mix"></canvas></div></div>
+  </div>
+  <div class="grid">
+    <div class="card"><h3>Rotas com maior impacto financeiro</h3><div class="table" id="topRoutes"></div></div>
+    <div class="card"><h3>Pareto de custos</h3><div class="chart"><canvas id="pareto"></canvas></div></div>
+  </div>
+  <div class="grid">
+    <div class="card"><h3>Atenção no período</h3><div id="alerts"></div></div>
+    <div class="card"><h3>Análise Inteligente</h3><div id="insights"></div></div>
+  </div>
+  <div class="card" style="margin-top:12px"><h3>Visão Executiva P1 × P2 (mês anterior × mês atual)</h3><div id="dashboardComparison"></div></div>
+</section>
+
+<section id="planejamento" class="page">
+  <div class="filters"><input id="planSearch" placeholder="Pesquisar viagem, rota, cliente, transportador..." oninput="renderPlanning()"><select id="statusFilter" onchange="renderPlanning()"><option value="">Todos os status</option></select><select id="clientFilter" onchange="renderPlanning()"><option value="">Todos os clientes</option></select></div>
+  <div class="card"><h3>Viagens da base</h3><div class="table" id="planningTable"></div></div>
+</section>
+
+<section id="custos" class="page">
+  <div class="kpis" id="costKpis"></div>
+  <div class="grid"><div class="card"><h3>Receita, custo e margem por transportador</h3><div class="chart"><canvas id="carrierChart"></canvas></div></div><div class="card"><h3>Qualidade e disponibilidade de custos</h3><div id="costStructure"></div></div></div>
+  <div class="card" style="margin-top:12px"><h3>Maiores custos por rota</h3><div class="table" id="costRoutes"></div></div>
+</section>
+
+<section id="pricing" class="page">
+  <div class="grid">
+    <div class="card">
+      <h3>Pricing Engine</h3>
+      <div class="filters">
+        <input id="pOrigin" placeholder="Origem">
+        <input id="pDestination" placeholder="Destino">
+        <input id="pkm" type="number" step=".01" placeholder="KM">
+        <input id="pVehicle" placeholder="Tipo de veículo">
+        <input id="ptoll" type="number" step=".01" placeholder="Pedágio">
+        <input id="cckm" type="number" step=".01" placeholder="Custo/km">
+        <input id="pm" type="number" step=".1" placeholder="Margem desejada %">
+        <input id="padd" type="number" step=".01" placeholder="Adicionais">
+        <input id="pprice" type="number" step=".01" placeholder="Preço praticado">
+        <button class="btn primary" onclick="calcPrice()">Calcular</button>
+      </div>
+      <div id="pricingResult" class="empty">Informe os dados da cotação. Nenhum valor é preenchido automaticamente com dados fictícios.</div>
+    </div>
+    <div class="card"><h3>Margem da base</h3><div class="value" id="marginBig">—</div><div class="bar"><i id="marginBar" style="width:0%"></i></div><p class="label">Margem = receita − custo total.</p></div>
+  </div>
+  <div class="card" style="margin-top:12px"><h3>Operações com menor margem</h3><div class="table" id="marginTable"></div></div>
+</section>
+
+<section id="rotas" class="page">
+  <div class="filters"><input id="routeSearch" placeholder="Pesquisar rota..." oninput="renderRoutes()"><select id="routeMode" onchange="renderRoutes()"><option value="all">Todas</option><option value="best">Mais rentáveis</option><option value="worst">Problemáticas</option></select></div>
+  <div class="grid"><div class="card"><h3>Rotas mais rentáveis</h3><div class="table" id="bestRoutes"></div></div><div class="card"><h3>Rotas problemáticas</h3><div class="table" id="worstRoutes"></div></div></div>
+  <div class="card" style="margin-top:12px"><h3>Margem por rota × quantidade de viagens</h3><div class="chart"><canvas id="routeScatter"></canvas></div></div>
+  <div class="card" style="margin-top:12px"><h3>Benchmark de rotas</h3><div class="table" id="routesTable"></div></div>
+</section>
+
+<section id="transportadores" class="page">
+  <div class="filters"><input id="carrierSearch" placeholder="Pesquisar transportador..." oninput="renderCarriers()"></div>
+  <div class="card"><h3>Ranking de transportadores</h3><div class="table" id="carrierTable"></div></div>
+</section>
+
+<section id="performance" class="page">
+  <div class="tabs"><button class="active" onclick="setPerf('month',this)">Mês</button><button onclick="setPerf('week',this)">Semana</button><button onclick="setPerf('all',this)">Base total</button></div>
+  <div class="grid"><div class="card"><h3>Comparativo P1 × P2 (mês anterior × mês atual)</h3><div id="comparison"></div></div><div class="card"><h3>Indicadores</h3><div id="perfIndicators"></div></div></div>
+</section>
+
+<section id="historico" class="page">
+  <div class="actions" style="justify-content:flex-end;margin-bottom:12px"><button class="btn danger" onclick="clearHistory()">🗑️ Limpar histórico</button></div>
+  <div class="card"><h3>Histórico de CSVs importados</h3><p class="muted small">O navegador guarda localmente os snapshots importados. O painel nunca inventa registros para preencher períodos sem CSV.</p><div class="table" id="historyTable"></div></div>
+</section>
+</main>
+</div>
+
+<div id="modal" class="modal" onclick="if(event.target===this)closeModal()"><div class="modalbox"><div class="modalhead"><h2 id="modalTitle">Detalhes da viagem</h2><button class="close" onclick="closeModal()">×</button></div><div id="modalBody"></div></div></div>
+
+<script>
+"use strict";
+let rows=[], headers=[], charts={}, currentPerf="month", currentSnapshotId=null, currentFileName=null;
+const HISTORY_KEY="transport_analytics_csv_history_v2";
+
+function norm(s){return String(s??"").trim().toUpperCase()}
+function key(name){let n=norm(name);return headers.find(x=>norm(x)===n)??name}
+function num(v){if(v===null||v===undefined||v==="")return 0;let s=String(v).trim().replace(/\s/g,"").replace(/^R\$/i,"");if(s.includes(",")&&s.includes(".")){if(s.lastIndexOf(",")>s.lastIndexOf("."))s=s.replace(/\./g,"").replace(",",".");else s=s.replace(/,/g,"")}else if(s.includes(","))s=s.replace(",",".");else if(s.includes(".")&&/^-?\d{1,3}(\.\d{3})+$/.test(s))s=s.replace(/\./g,"");return Number(s.replace(/[^\d.-]/g,""))||0}
+function money(v){return Number(v||0).toLocaleString("pt-BR",{style:"currency",currency:"BRL"})}
+function esc(s){return String(s??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#39;"}[m]))}
+function get(r,names){for(const n of names){const k=key(n);if(r[k]!==undefined&&String(r[k]).trim()!=="")return r[k]}return ""}
+function calc(r){return {km:num(get(r,["KM","DISTANCIA","DISTÂNCIA"])),revenue:num(get(r,["RECEITA","VALOR RECEITA","VALOR"])),cost:num(get(r,["CUSTO TOTAL","CUSTO","CUSTO REAL"])),toll:num(get(r,["VALOR PEDAGIO","VALOR PEDÁGIO","PEDAGIO","PEDÁGIO"])),value:num(get(r,["VALOR","VALOR FRETE","FRETE"]))}}
+function statusOf(r){return norm(get(r,["STATUS","SITUACAO","SITUAÇÃO"]))}
+function dateOf(r){return get(r,["DATA","DATA VIAGEM","DATA DA VIAGEM","DATA DE EMISSAO","DATA DE EMISSÃO"])}
+function parseDate(v){if(!v)return null;let s=String(v).trim();let d;if(/^\d{2}\/\d{2}\/\d{4}/.test(s)){let [dd,mm,yyyy]=s.slice(0,10).split("/");d=new Date(+yyyy,+mm-1,+dd)}else if(/^\d{4}-\d{2}-\d{2}/.test(s)){d=new Date(s.slice(0,10)+"T00:00:00")}else{d=new Date(s)}return isNaN(d)?null:d}
+function isoDate(d){return d?`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,"0")}-${String(d.getDate()).padStart(2,"0")}`:""}
+const MESES_PT=["Janeiro","Fevereiro","Março","Abril","Maio","Junho","Julho","Agosto","Setembro","Outubro","Novembro","Dezembro"];
+function extractYear(s){let m=String(s).match(/(20\d{2})/);if(m)return +m[1];let m2=String(s).match(/\b(\d{2})\b\s*$/);return m2?2000+ +m2[1]:null}
+function parseMonthName(s){s=norm(s);let mA=s.match(/^(\d{1,2})[\/\-.](\d{4})$/);if(mA)return +mA[1]-1;let mB=s.match(/^(\d{4})[\/\-.](\d{1,2})$/);if(mB)return +mB[2]-1;let mC=s.match(/^(\d{1,2})$/);if(mC&&+mC[1]>=1&&+mC[1]<=12)return +mC[1]-1;for(let i=0;i<MESES_PT.length;i++){let full=norm(MESES_PT[i]),abbr=full.slice(0,3);if(s.startsWith(full)||s.includes(full)||s.startsWith(abbr))return i}return null}
+function periodLabelFromFilename(name){if(!name)return null;let base=String(name).replace(/\.[a-z0-9]+$/i,""),s=norm(base);for(let i=0;i<MESES_PT.length;i++){let full=norm(MESES_PT[i]);if(s.includes(full)){let year=extractYear(s)||new Date().getFullYear();return `${MESES_PT[i]}/${year}`}}let tokens=s.split(/[^0-9A-Z]+/).filter(Boolean);for(let i=0;i<tokens.length-1;i++){let a=tokens[i],b=tokens[i+1];if(/^(0?[1-9]|1[0-2])$/.test(a)&&/^20\d{2}$/.test(b))return `${MESES_PT[+a-1]}/${b}`;if(/^20\d{2}$/.test(a)&&/^(0?[1-9]|1[0-2])$/.test(b))return `${MESES_PT[+b-1]}/${a}`}return null}
+function periodLabelForRows(data,fileName){let byName=periodLabelFromFilename(fileName);if(byName)return byName;let dates=data.map(r=>parseDate(dateOf(r))).filter(Boolean).sort((a,b)=>a-b);if(dates.length){let first=dates[0],last=dates[dates.length-1];if(first.getFullYear()===last.getFullYear()&&first.getMonth()===last.getMonth())return `${MESES_PT[first.getMonth()]}/${first.getFullYear()}`;return `${isoDate(first)} a ${isoDate(last)}`}return fileName||"Período"}
+function getPeriodComparison(){if(!rows.length)return null;let h=loadHistory(),others=h.filter(x=>x.id!==currentSnapshotId).sort((a,b)=>new Date(b.importedAt)-new Date(a.importedAt));if(!others.length)return null;let prevEntry=others[0];return {cur:{label:periodLabelForRows(rows,currentFileName),a:aggregate(rows)},prev:{label:periodLabelForRows(prevEntry.rows,prevEntry.fileName),a:aggregate(prevEntry.rows)}}}
+function aggregate(data=rows){let a={trips:data.length,km:0,revenue:0,cost:0,toll:0,cancel:0};data.forEach(r=>{let x=calc(r);a.km+=x.km;a.revenue+=x.revenue;a.cost+=x.cost;a.toll+=x.toll;if(statusOf(r).includes("CANCEL"))a.cancel++});a.margin=a.revenue-a.cost;a.marginPct=a.revenue?a.margin/a.revenue:0;a.costKm=a.km?a.cost/a.km:0;a.revKm=a.km?a.revenue/a.km:0;return a}
+function groupBy(field,data=rows){let m=new Map();data.forEach(r=>{let k=get(r,[field])||"Não informado",x=calc(r),o=m.get(k)||{name:k,trips:0,km:0,revenue:0,cost:0,toll:0,cancel:0};o.trips++;o.km+=x.km;o.revenue+=x.revenue;o.cost+=x.cost;o.toll+=x.toll;if(statusOf(r).includes("CANCEL"))o.cancel++;m.set(k,o)});return [...m.values()].map(o=>({...o,margin:o.revenue-o.cost,marginPct:o.revenue?(o.revenue-o.cost)/o.revenue:0,costKm:o.km?o.cost/o.km:0}))}
+function badge(s){let n=norm(s),cls=n.includes("CANCEL")?"bad":n.includes("FINAL")||n.includes("CONFER")||n.includes("CONCLU")?"ok":n.includes("INICI")||n.includes("ANDAMENTO")?"info":"warn";return `<span class="badge ${cls}">${esc(s||"—")}</span>`}
+function hasData(){return rows.length>0}
+function currentData(){if(!rows.length)return [];let f=document.getElementById("periodFilter")?.value||"all";if(f==="all")return rows;let now=new Date();now.setHours(0,0,0,0);let start=new Date(now),end=new Date(now);if(f==="today"){}else if(f==="yesterday"){start.setDate(start.getDate()-1);end.setDate(end.getDate()-1)}else if(f==="week"){start.setDate(start.getDate()-start.getDay()+1)}else if(f==="month"){start.setDate(1)}else if(f==="custom"){let a=document.getElementById("dateFrom").value,b=document.getElementById("dateTo").value;return rows.filter(r=>{let d=parseDate(dateOf(r));return d&&(!a||isoDate(d)>=a)&&(!b||isoDate(d)<=b)})}return rows.filter(r=>{let d=parseDate(dateOf(r));return d&&d>=start&&d<=end})}
+function renderAll(){render();renderPlanning();renderCosts();renderRoutes();renderCarriers();renderPerformance();renderHistory()}
+function render(){let data=currentData(),a=aggregate(data);renderDashboardComparison();document.getElementById("kpis").innerHTML=[
+["Viagens do período",data.length,"registros no período"],["Viagens em andamento",data.filter(r=>/INICI|ANDAMENTO|TRANSIT/.test(statusOf(r))).length,"status operacional"],["Viagens concluídas",data.filter(r=>/FINAL|CONFER|CONCLU|ENTREG/.test(statusOf(r))).length,"status concluído/conferido"],["Viagens canceladas",a.cancel,"status cancelado"],["KM planejado",a.km.toLocaleString("pt-BR"),"KM disponível no CSV"],["Receita prevista",money(a.revenue),"receita disponível"],["Custo previsto",money(a.cost),"custo disponível"],["Margem prevista",a.revenue?(a.marginPct*100).toFixed(1)+"%":"—",a.revenue?money(a.margin):"sem receita"]
+].map((x,i)=>`<div class="card"><div class="label">${x[0]}</div><div class="value">${x[1]}</div><div class="delta ${i===7&&a.marginPct<.1?"red":"green"}">${x[2]}</div></div>`).join("");
+document.getElementById("marginBig").textContent=a.revenue?(a.marginPct*100).toFixed(1)+"%":"—";document.getElementById("marginBar").style.width=Math.max(0,Math.min(100,a.marginPct*100))+"%";
+renderAlerts(data);renderTopRoutes(data);renderInsights(data);renderCharts(data)}
+function renderAlerts(data){let critical=[],attention=[],opportunity=[],target=targetCostKm(data);data.forEach(r=>{let x=calc(r),m=x.revenue?(x.revenue-x.cost)/x.revenue:0;if(x.revenue&&x.cost>x.revenue)critical.push(r);else if(x.revenue&&m<.05)critical.push(r);if(x.cost===0)critical.push(r);else if(target&&x.km&&x.cost/x.km>target*1.15)attention.push(r);});let groups=groupBy("ROTA",data).filter(x=>x.trips>=2).sort((a,b)=>b.marginPct-a.marginPct);groups.slice(0,3).forEach(x=>{if(x.marginPct>.25)opportunity.push(x)});let html=[];if(critical.length)html.push(`<div class="alert critical">🔴 <b>${critical.length}</b> registros críticos: custo maior que receita, margem abaixo de 5% ou custo ausente.</div>`);if(attention.length)html.push(`<div class="alert attention">🟠 <b>${attention.length}</b> registros acima do custo/km de referência calculado pela mediana da base.</div>`);let noCost=data.filter(r=>calc(r).cost===0).length;if(noCost)html.push(`<div class="alert attention">🟡 <b>${noCost}</b> viagens sem custo informado.</div>`);if(opportunity.length)html.push(`<div class="alert opportunity">🟢 <b>${opportunity.length}</b> rotas com margem acima de 25% e pelo menos 2 viagens.</div>`);if(!html.length)html.push(`<div class="alert info">🔵 Nenhum alerta gerável com os campos disponíveis nesta base.</div>`);document.getElementById("alerts").innerHTML=html.join("")}
+function targetCostKm(data){let vals=data.map(r=>{let x=calc(r);return x.km&&x.cost?x.cost/x.km:null}).filter(v=>v!==null).sort((a,b)=>a-b);return vals.length?vals[Math.floor(vals.length/2)]:0}
+function renderTopRoutes(data){let a=groupBy("ROTA",data).sort((x,y)=>y.cost-x.cost).slice(0,10);document.getElementById("topRoutes").innerHTML=a.length?`<table><thead><tr><th>Rota</th><th>Viagens</th><th>KM</th><th>Custo</th><th>R$/km</th><th>Margem %</th></tr></thead><tbody>${a.map(x=>`<tr><td>${esc(x.name)}</td><td>${x.trips}</td><td>${x.km.toLocaleString("pt-BR")}</td><td>${money(x.cost)}</td><td>${money(x.costKm)}</td><td>${(x.marginPct*100).toFixed(1)}%</td></tr>`).join("")}</tbody></table>`:`<div class="empty">Importe um CSV para visualizar as rotas.</div>`}
+function renderInsights(data){let out=[];let a=aggregate(data),routes=groupBy("ROTA",data).filter(x=>x.trips>=2),car=groupBy("TRANSPORTADOR",data).filter(x=>x.trips>=2);if(routes.length){let worst=[...routes].sort((x,y)=>x.costKm-y.costKm).pop(),best=[...routes].sort((x,y)=>y.marginPct-x.marginPct)[0];if(worst)out.push(`💡 A rota <b>${esc(worst.name)}</b> tem custo médio de ${money(worst.costKm)}/km.`);if(best)out.push(`💡 A rota <b>${esc(best.name)}</b> apresenta a maior margem entre as rotas com múltiplas viagens: <b>${(best.marginPct*100).toFixed(1)}%</b>.`)}if(car.length){let top=[...car].sort((x,y)=>y.trips-x.trips).slice(0,5),share=a.trips?top.reduce((s,x)=>s+x.trips,0)/a.trips:0;out.push(`💡 Os 5 maiores transportadores representam <b>${(share*100).toFixed(1)}%</b> das viagens, quando há pelo menos cinco transportadores com dados.`)}let low=data.filter(r=>{let x=calc(r);return x.revenue&&((x.revenue-x.cost)/x.revenue)<.1}).length;if(low)out.push(`⚠️ <b>${low}</b> viagens têm margem inferior a 10%.`);if(!out.length)out.push("Aguardando dados suficientes para gerar insights sem inventar informações.");document.getElementById("insights").innerHTML=out.map(x=>`<div class="alert info">${x}</div>`).join("")}
+function renderPlanningFilters(){let st=[...new Set(rows.map(r=>get(r,["STATUS","SITUACAO","SITUAÇÃO"])).filter(Boolean))].sort(),cl=[...new Set(rows.map(r=>get(r,["CLIENTE"])).filter(Boolean))].sort();document.getElementById("statusFilter").innerHTML='<option value="">Todos os status</option>'+st.map(x=>`<option>${esc(x)}</option>`).join("");document.getElementById("clientFilter").innerHTML='<option value="">Todos os clientes</option>'+cl.map(x=>`<option>${esc(x)}</option>`).join("")}
+function renderPlanning(){renderPlanningFilters();let q=norm(document.getElementById("planSearch").value),st=document.getElementById("statusFilter").value,cl=document.getElementById("clientFilter").value;let data=rows.filter(r=>(!q||norm([get(r,["VIAGEM ID","ID","ID VIAGEM"]),get(r,["ROTA"]),get(r,["CLIENTE"]),get(r,["TRANSPORTADOR"]),get(r,["PLACA"])].join(" ")).includes(q))&&(!st||get(r,["STATUS","SITUACAO","SITUAÇÃO"])===st)&&(!cl||get(r,["CLIENTE"])===cl)).slice(0,500);document.getElementById("planningTable").innerHTML=data.length?`<table class="clickable"><thead><tr><th>Data</th><th>Viagem</th><th>Rota</th><th>Cliente</th><th>Transportador</th><th>Placa</th><th>KM</th><th>Receita</th><th>Custo</th><th>Margem</th><th>Status</th></tr></thead><tbody>${data.map(r=>{let i=rows.indexOf(r),x=calc(r),m=x.revenue?(x.revenue-x.cost)/x.revenue:null;return `<tr onclick="openTrip(${i})"><td>${esc(dateOf(r))}</td><td>${esc(get(r,["VIAGEM ID","ID","ID VIAGEM"])||"—")}</td><td>${esc(get(r,["ROTA"]))}</td><td>${esc(get(r,["CLIENTE"]))}</td><td>${esc(get(r,["TRANSPORTADOR"]))}</td><td>${esc(get(r,["PLACA"]))}</td><td>${x.km}</td><td>${money(x.revenue)}</td><td>${money(x.cost)}</td><td>${m===null?"—":(m*100).toFixed(1)+"%"}</td><td>${badge(statusOf(r))}</td></tr>`}).join("")}</tbody></table>`:`<div class="empty">Nenhum dado encontrado. Importe um CSV.</div>`}
+function renderCosts(){let a=aggregate(currentData());document.getElementById("costKpis").innerHTML=[["Realizado",money(a.cost)],["Pedágio",money(a.toll)],["Custo/km",money(a.costKm)],["Receita",money(a.revenue)]].map(x=>`<div class="card"><div class="label">${x[0]}</div><div class="value">${x[1]}</div></div>`).join("");let c=groupBy("TRANSPORTADOR",currentData()).sort((a,b)=>b.cost-a.cost).slice(0,10);document.getElementById("costStructure").innerHTML=`<div class="metricrow"><div class="line"><span>Pedágio / custo total</span><b>${a.cost?(a.toll/a.cost*100).toFixed(1):"0.0"}%</b></div><div class="bar"><i style="width:${a.cost?Math.min(100,a.toll/a.cost*100):0}%"></i></div></div><p class="label">Apenas componentes realmente presentes no CSV são usados.</p>`;let d=groupBy("ROTA",currentData()).sort((x,y)=>y.cost-x.cost).slice(0,20);document.getElementById("costRoutes").innerHTML=d.length?`<table><thead><tr><th>Rota</th><th>Viagens</th><th>Receita</th><th>Custo</th><th>Margem</th><th>Margem %</th></tr></thead><tbody>${d.map(x=>`<tr><td>${esc(x.name)}</td><td>${x.trips}</td><td>${money(x.revenue)}</td><td>${money(x.cost)}</td><td>${money(x.margin)}</td><td>${(x.marginPct*100).toFixed(1)}%</td></tr>`).join("")}</tbody></table>`:`<div class="empty">Sem dados.</div>`}
+function renderRoutes(){let q=norm(document.getElementById("routeSearch").value),d=groupBy("ROTA",currentData()).filter(x=>!q||norm(x.name).includes(q));let best=[...d].sort((a,b)=>b.marginPct-a.marginPct).slice(0,10),worst=[...d].sort((a,b)=>a.marginPct-b.marginPct).slice(0,10);document.getElementById("bestRoutes").innerHTML=routeMini(best);document.getElementById("worstRoutes").innerHTML=routeMini(worst);document.getElementById("routesTable").innerHTML=d.sort((a,b)=>b.trips-a.trips).map(x=>`<tr><td>${esc(x.name)}</td><td>${x.trips}</td><td>${x.km.toLocaleString("pt-BR")}</td><td>${money(x.revenue)}</td><td>${money(x.cost)}</td><td>${money(x.km?x.revenue/x.km:0)}</td><td>${money(x.costKm)}</td><td>${(x.marginPct*100).toFixed(1)}%</td></tr>`).join("")||`<tr><td colspan="8" class="empty">Sem dados.</td></tr>`;renderRouteChart(d)}
+function routeMini(d){return d.length?`<table><thead><tr><th>Rota</th><th>Viagens</th><th>Margem</th><th>Custo/km</th></tr></thead><tbody>${d.map(x=>`<tr><td>${esc(x.name)}</td><td>${x.trips}</td><td>${(x.marginPct*100).toFixed(1)}%</td><td>${money(x.costKm)}</td></tr>`).join("")}</tbody></table>`:`<div class="empty">Sem dados.</div>`}
+function renderCarriers(){let q=norm(document.getElementById("carrierSearch").value),d=groupBy("TRANSPORTADOR",currentData()).filter(x=>!q||norm(x.name).includes(q)).sort((a,b)=>b.trips-a.trips),total=d.reduce((s,x)=>s+x.trips,0);document.getElementById("carrierTable").innerHTML=d.length?`<table><thead><tr><th>Transportador</th><th>Viagens</th><th>KM</th><th>Receita</th><th>Custo</th><th>Custo/km</th><th>Margem</th><th>Margem %</th><th>Cancel.</th><th>Participação</th><th>Status</th></tr></thead><tbody>${d.map(x=>`<tr><td>${esc(x.name)}</td><td>${x.trips}</td><td>${x.km.toLocaleString("pt-BR")}</td><td>${money(x.revenue)}</td><td>${money(x.cost)}</td><td>${money(x.costKm)}</td><td>${money(x.margin)}</td><td>${(x.marginPct*100).toFixed(1)}%</td><td>${x.cancel}</td><td>${total?(x.trips/total*100).toFixed(1):0}%</td><td>${x.marginPct>=.2?'<span class="badge ok">🟢</span>':x.marginPct>=.1?'<span class="badge warn">🟡</span>':'<span class="badge bad">🔴</span>'}</td></tr>`).join("")}</tbody></table>`:`<div class="empty">Sem dados.</div>`}
+function renderPerformance(){let data=currentData(),a=aggregate(data);document.getElementById("perfIndicators").innerHTML=`<div class="metricrow"><div class="line"><span>Margem</span><b>${a.revenue?(a.marginPct*100).toFixed(1)+"%":"—"}</b></div><div class="bar"><i style="width:${Math.max(0,Math.min(100,a.marginPct*100))}%"></i></div></div><div class="metricrow"><div class="line"><span>Custo/km</span><b>${money(a.costKm)}</b></div></div><div class="metricrow"><div class="line"><span>Cancelamentos</span><b>${a.trips?(a.cancel/a.trips*100).toFixed(1):"0.0"}%</b></div></div>`;document.getElementById("comparison").innerHTML=periodComparisonHtml()}
+function pctDelta(x,y){if(!y)return null;return (x-y)/Math.abs(y)*100}
+function deltaCell(delta,isPP){if(delta===null)return {txt:"—",cls:""};let txt=(delta>=0?"+":"")+delta.toFixed(1)+(isPP?" p.p.":"%");return {txt,cls:delta>=0?"positive":"negative"}}
+function periodComparisonHtml(){
+  let comp=getPeriodComparison();
+  if(!comp)return `<div class="empty">Para gerar a comparação P1 × P2, importe pelo menos 2 CSVs (cada um referente a um mês/período). O arquivo atual é comparado com o CSV anterior salvo no Histórico.</div>`;
+  let {cur,prev}=comp,ca=cur.a,pa=prev.a;
+  let metrics=[
+    {label:"Viagens",pv:pa.trips,cv:ca.trips,fmt:x=>x.toLocaleString("pt-BR"),dir:"neutral"},
+    {label:"KM",pv:pa.km,cv:ca.km,fmt:x=>x.toLocaleString("pt-BR"),dir:"neutral"},
+    {label:"Receita",pv:pa.revenue,cv:ca.revenue,fmt:money,dir:"up"},
+    {label:"Custo total",pv:pa.cost,cv:ca.cost,fmt:money,dir:"down"},
+    {label:"Custo/km",pv:pa.costKm,cv:ca.costKm,fmt:money,dir:"down"},
+    {label:"Margem (R$)",pv:pa.margin,cv:ca.margin,fmt:money,dir:"up"},
+    {label:"Margem %",pv:pa.marginPct*100,cv:ca.marginPct*100,fmt:x=>x.toFixed(1)+"%",dir:"up",isPP:true}
+  ];
+  let rowsHtml=metrics.map(m=>{
+    let delta=m.isPP?(m.pv||m.cv?m.cv-m.pv:null):pctDelta(m.cv,m.pv);
+    let d=deltaCell(delta,m.isPP);
+    let cls=m.dir==="neutral"||delta===null?"":((m.dir==="up")===(delta>=0)?"positive":"negative");
+    return `<tr><td>${m.label}</td><td>${m.fmt(m.pv)}</td><td>${m.fmt(m.cv)}</td><td class="${cls}">${d.txt}</td></tr>`;
+  }).join("");
+  let costPct=pctDelta(ca.cost,pa.cost),revPct=pctDelta(ca.revenue,pa.revenue),marginPP=ca.marginPct!==undefined?(ca.marginPct-pa.marginPct)*100:null;
+  let parts=[];
+  if(costPct!==null)parts.push(`Custo ${costPct>=0?"subiu":"caiu"} <b>${Math.abs(costPct).toFixed(1)}%</b>`);
+  if(revPct!==null)parts.push(`Receita ${revPct>=0?"subiu":"caiu"} <b>${Math.abs(revPct).toFixed(1)}%</b>`);
+  parts.push(`Margem ${marginPP>=0?"subiu":"caiu"} <b>${Math.abs(marginPP).toFixed(1)} p.p.</b>`);
+let headlineCls=marginPP<-2?"critical":marginPP<0?"attention":"opportunity";
+  let headlineIcon=marginPP<-2?"🔴":marginPP<0?"🟠":"🟢";
+  return `<div class="alert ${headlineCls}">${headlineIcon} <b>P1 (${esc(prev.label)}) × P2 (${esc(cur.label)}):</b> ${parts.join(" · ")}.</div>
+  <div class="table"><table><thead><tr><th>Indicador</th><th>P1 · ${esc(prev.label)}</th><th>P2 · ${esc(cur.label)}</th><th>Variação</th></tr></thead><tbody>${rowsHtml}</tbody></table></div>`;
+}
+function renderDashboardComparison(){let el=document.getElementById("dashboardComparison");if(!el)return;el.innerHTML=periodComparisonHtml()}
+function setPerf(mode,btn){currentPerf=mode;document.querySelectorAll(".tabs button").forEach(b=>b.classList.remove("active"));btn.classList.add("active");renderPerformance()}
+function renderQuality(){return}
+function renderCharts(data){Object.values(charts).forEach(c=>c?.destroy());if(!data.length)return;let byDate=groupBy("DATA",data).sort((a,b)=>a.name.localeCompare(b.name)).slice(-14);charts.trend=new Chart(document.getElementById("trend"),{type:"bar",data:{labels:byDate.map(x=>x.name),datasets:[{label:"Receita",data:byDate.map(x=>x.revenue)},{label:"Custo",data:byDate.map(x=>x.cost)}]},options:{responsive:true,maintainAspectRatio:false,scales:{y:{ticks:{callback:v=>money(v)}}},plugins:{legend:{position:"bottom"}}}});let a=aggregate(data);charts.mix=new Chart(document.getElementById("mix"),{type:"doughnut",data:{labels:["Pedágio","Demais custos"],datasets:[{data:[a.toll,Math.max(0,a.cost-a.toll)]}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom"}}}});let car=groupBy("TRANSPORTADOR",data).sort((a,b)=>b.cost-a.cost).slice(0,8);if(document.getElementById("carrierChart"))charts.carrier=new Chart(document.getElementById("carrierChart"),{type:"bar",data:{labels:car.map(x=>x.name.length>20?x.name.slice(0,20)+"…":x.name),datasets:[{label:"Receita",data:car.map(x=>x.revenue)},{label:"Custo",data:car.map(x=>x.cost)}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{position:"bottom"}}}});let p=groupBy("TRANSPORTADOR",data).sort((a,b)=>b.cost-a.cost).slice(0,10),total=p.reduce((s,x)=>s+x.cost,0),cum=0;charts.pareto=new Chart(document.getElementById("pareto"),{type:"bar",data:{labels:p.map(x=>x.name.length>15?x.name.slice(0,15)+"…":x.name),datasets:[{label:"Custo",data:p.map(x=>x.cost)}]},options:{responsive:true,maintainAspectRatio:false,plugins:{legend:{display:false}}}})}
+function renderRouteChart(d){if(charts.routeScatter)charts.routeScatter.destroy();if(!d.length)return;charts.routeScatter=new Chart(document.getElementById("routeScatter"),{type:"scatter",data:{datasets:[{label:"Rotas",data:d.map(x=>({x:x.trips,y:x.marginPct*100,label:x.name})),pointRadius:6}]},options:{responsive:true,maintainAspectRatio:false,scales:{x:{title:{display:true,text:"Quantidade de viagens"},beginAtZero:true},y:{title:{display:true,text:"Margem %"}}},plugins:{tooltip:{callbacks:{label:c=>`${c.raw.label}: ${c.raw.x} viagens · ${c.raw.y.toFixed(1)}% margem`}}}}})}
+function calcPrice(){let km=num(document.getElementById("pkm").value),ck=num(document.getElementById("cckm").value),margin=num(document.getElementById("pm").value)/100,toll=num(document.getElementById("ptoll").value),add=num(document.getElementById("padd").value),pr=num(document.getElementById("pprice").value),base=km*ck,total=base+toll+add,min=margin<1?total/(1-margin):total,real=pr?((pr-total)/pr):null;document.getElementById("pricingResult").innerHTML=`<table><tbody><tr><td>Custo base</td><th>${money(base)}</th></tr><tr><td>Pedágio</td><th>${money(toll)}</th></tr><tr><td>Adicionais</td><th>${money(add)}</th></tr><tr><td>Custo total</td><th>${money(total)}</th></tr><tr><td>Margem desejada</td><th>${(margin*100).toFixed(1)}%</th></tr><tr><td>Preço mínimo</td><th>${money(min)}</th></tr><tr><td>Preço praticado</td><th>${pr?money(pr):"—"}</th></tr><tr><td>Margem real</td><th>${real===null?"—":(real*100).toFixed(1)+"%"}</th></tr><tr><td>Resultado</td><th>${real===null?"—":real>=margin?"🟢 Viável":"🔴 Abaixo da margem desejada"}</th></tr></tbody></table>`}
+function openTrip(i){let r=rows[i];if(!r)return;let x=calc(r),m=x.revenue?(x.revenue-x.cost)/x.revenue:null;let fields=[["Viagem",get(r,["VIAGEM ID","ID","ID VIAGEM"])],["Data",dateOf(r)],["Origem",get(r,["ORIGEM"])],["Destino",get(r,["DESTINO"])],["Rota",get(r,["ROTA"])],["Cliente",get(r,["CLIENTE"])],["Transportador",get(r,["TRANSPORTADOR"])],["Motorista",get(r,["MOTORISTA"])],["Placa",get(r,["PLACA"])],["Tipo de veículo",get(r,["TIPO DE VEICULO","TIPO DE VEÍCULO","VEICULO","VEÍCULO"])],["KM",x.km],["Status",statusOf(r)],["Valor",money(x.value)],["Receita",money(x.revenue)],["Pedágio",money(x.toll)],["Custo total",money(x.cost)],["Margem",money(x.revenue-x.cost)],["Margem %",m===null?"—":(m*100).toFixed(1)+"%"]];document.getElementById("modalTitle").textContent=`VIAGEM ${fields[0][1]||"—"}`;document.getElementById("modalBody").innerHTML=`<div class="detailgrid">${fields.map(f=>`<div class="detail"><span class="label">${esc(f[0])}</span><b>${esc(f[1]??"—")}</b></div>`).join("")}</div><div class="alert ${m===null?"info":m<.05?"critical":m<.1?"attention":"opportunity"}" style="margin-top:14px">${m===null?"ℹ️ Sem receita suficiente para calcular a margem.":m<.05?"🔴 Operação crítica.":m<.1?"🟠 Operação exige atenção.":"🟢 Operação rentável."} ${m===null?"":`Margem: <b>${(m*100).toFixed(1)}%</b>`}</div>`;document.getElementById("modal").classList.add("open")}
+function closeModal(){document.getElementById("modal").classList.remove("open")}
+function parseCSV(text){let lines=text.replace(/^\uFEFF/,"").split(/\r?\n/).filter(x=>x.trim());if(!lines.length)throw Error("CSV vazio");let delim=lines[0].includes(";")?";":",";function split(line){let out=[],cur="",q=false;for(let i=0;i<line.length;i++){let ch=line[i];if(ch==='"'){if(q&&line[i+1]==='"'){cur+='"';i++}else q=!q}else if(ch===delim&&!q){out.push(cur);cur=""}else cur+=ch}out.push(cur);return out}headers=split(lines[0]).map(x=>x.trim());rows=lines.slice(1).map(l=>{let a=split(l),o={};headers.forEach((h,i)=>o[h]=a[i]??"");return o}).filter(o=>Object.values(o).some(v=>String(v).trim()!==""));if(!rows.length)throw Error("O CSV não possui registros")}
+function saveHistory(fileName){let id=Date.now(),h=loadHistory();h.push({id,fileName,importedAt:new Date().toISOString(),headers,rows});if(h.length>20)h=h.slice(-20);try{localStorage.setItem(HISTORY_KEY,JSON.stringify(h))}catch(e){/* storage full: current session continues */}return id}
+function loadHistory(){try{return JSON.parse(localStorage.getItem(HISTORY_KEY)||"[]")}catch(e){return []}}
+function renderHistory(){let h=loadHistory().slice().reverse();document.getElementById("historyTable").innerHTML=h.length?`<table><thead><tr><th>Período</th><th>Importado em</th><th>Arquivo</th><th>Registros</th><th>Colunas</th><th>Ações</th></tr></thead><tbody>${h.map((s,idx)=>`<tr><td>P${h.length-idx}</td><td>${new Date(s.importedAt).toLocaleString("pt-BR")}</td><td>${esc(s.fileName)}</td><td>${s.rows.length}</td><td>${s.headers.length}</td><td><button class="btn" onclick="loadSnapshot(${s.id})">Carregar</button> <button class="btn danger" onclick="deleteSnapshot(${s.id})">🗑️ Excluir</button></td></tr>`).join("")}</tbody></table>`:`<div class="empty">Nenhum CSV foi armazenado ainda.</div>`}
+function loadSnapshot(id){let s=loadHistory().find(x=>x.id===id);if(!s)return;headers=s.headers;rows=s.rows;currentSnapshotId=s.id;currentFileName=s.fileName;document.getElementById("fileStatus").className="notice";document.getElementById("fileStatus").innerHTML=`<b>${esc(s.fileName)}</b> recuperado do histórico · ${rows.length} registros.`;renderAll()}
+function deleteSnapshot(id){
+  const h=loadHistory();
+  const s=h.find(x=>x.id===id);
+  if(!s)return;
+  if(!confirm(`Excluir o CSV "${s.fileName}" do histórico?\n\nIsso não apagará o arquivo original do seu computador.`))return;
+  const updated=h.filter(x=>x.id!==id);
+  try{localStorage.setItem(HISTORY_KEY,JSON.stringify(updated))}catch(e){}
+  if(rows===s.rows || (rows.length===s.rows.length && rows.length && rows[0]===s.rows[0])){
+    rows=[];headers=[];currentSnapshotId=null;currentFileName=null;
+    document.getElementById("fileStatus").className="notice empty";
+    document.getElementById("fileStatus").innerHTML="CSV removido do histórico. Nenhuma base está carregada.";
+  }
+  renderAll();
+}
+function clearHistory(){
+  const h=loadHistory();
+  if(!h.length){alert("Não há CSVs armazenados no histórico.");return}
+  if(!confirm(`Excluir TODOS os ${h.length} CSV(s) do histórico?\n\nIsso removerá apenas os snapshots salvos neste navegador. Os arquivos originais do seu computador não serão apagados.`))return;
+  try{localStorage.removeItem(HISTORY_KEY)}catch(e){}
+  rows=[];headers=[];currentSnapshotId=null;currentFileName=null;
+  document.getElementById("fileStatus").className="notice empty";
+  document.getElementById("fileStatus").innerHTML="Histórico limpo. Nenhum CSV está carregado.";
+  renderAll();
+}
+
+function exportCSV(){if(!rows.length){alert("Importe um CSV antes de exportar.");return}let a=aggregate(currentData()),csv="Indicador;Valor\nViagens;"+a.trips+"\nKM total;"+a.km+"\nReceita;"+a.revenue.toFixed(2)+"\nCusto total;"+a.cost.toFixed(2)+"\nCusto por KM;"+a.costKm.toFixed(2)+"\nMargem;"+a.margin.toFixed(2)+"\nMargem %;"+(a.marginPct*100).toFixed(2);let blob=new Blob(["\ufeff"+csv],{type:"text/csv;charset=utf-8"}),ael=document.createElement("a");ael.href=URL.createObjectURL(blob);ael.download="transport_analytics_resumo.csv";ael.click();URL.revokeObjectURL(ael.href)}
+document.getElementById("file").addEventListener("change",e=>{let f=e.target.files[0];if(!f)return;let rd=new FileReader();rd.onload=()=>{try{parseCSV(rd.result);currentSnapshotId=saveHistory(f.name);currentFileName=f.name;document.getElementById("fileStatus").className="notice";document.getElementById("fileStatus").innerHTML=`<b>${esc(f.name)}</b> importado com sucesso · ${rows.length} registros · ${new Date().toLocaleString("pt-BR")}.`;renderAll()}catch(err){alert("Não foi possível ler o CSV: "+err.message)}};rd.readAsText(f,"windows-1252")});
+document.querySelectorAll(".nav button").forEach(b=>b.onclick=()=>{document.querySelectorAll(".nav button").forEach(x=>x.classList.remove("active"));b.classList.add("active");document.querySelectorAll(".page").forEach(p=>p.classList.toggle("active",p.id===b.dataset.page));let t={dashboard:["Torre de Controle","Operação, custos, rentabilidade e alertas"],planejamento:["Planejamento","Programação, viagens e execução"],custos:["Gestão de Custos","Receita, custo, desvios e rentabilidade"],pricing:["Pricing","Formação de preço e margem"],rotas:["Rotas","Rentabilidade, volume e benchmark"],transportadores:["Transportadores","Performance e participação na operação"],performance:["Performance","Comparativos e indicadores históricos"],historico:["Histórico CSV","Snapshots locais dos arquivos importados"]}[b.dataset.page];document.getElementById("pageTitle").textContent=t[0];document.getElementById("pageSub").textContent=t[1]});
+renderAll();
+</script>
+</body>
+</html>
